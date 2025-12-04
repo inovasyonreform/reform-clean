@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 // TypeScript Arayüzü
 type AboutContent = {
@@ -18,13 +18,48 @@ export default function AboutEditor() {
   const [about, setAbout] = useState<AboutContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false); // Yeni yükleme durumu
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Base64'e dönüştürme ve URL'yi güncelleme fonksiyonu (Simülasyon)
+  const uploadImage = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: "Lütfen bir resim dosyası seçin." });
+      return;
+    }
+    
+    setUploading(true);
+    setMessage(null);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      // Base64 veri, image_url olarak atanır
+      const base64Image = reader.result as string;
+      handleChange('image_url', base64Image);
+      setUploading(false);
+      setMessage({ type: 'success', text: "Görsel başarıyla yüklendi (Base64 simülasyonu)." });
+    };
+    reader.onerror = () => {
+        setUploading(false);
+        setMessage({ type: 'error', text: "Görsel yüklenirken bir hata oluştu." });
+    };
+
+    // Base64 string'ini okuma
+    reader.readAsDataURL(file);
+  };
+  
+  // File input tetikleyici
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
 
   // Veri çekme fonksiyonu
   const fetchAbout = useCallback(async () => {
     setLoading(true);
     setMessage(null);
     try {
+      // DİKKAT: Gerçek API bağlantısı
       const res = await fetch("/api/about");
       if (!res.ok) {
         throw new Error("API isteği başarısız.");
@@ -34,6 +69,8 @@ export default function AboutEditor() {
       if (Array.isArray(data) && data.length > 0) {
         setAbout(data[0]);
       } else {
+        // Düzenlenecek içerik yoksa, yeni bir boş kayıt oluşturma simülasyonu yapabiliriz.
+        // Şimdilik hata mesajını koruyoruz.
         setMessage({ type: 'error', text: "Veri bulunamadı. Lütfen kontrol edin." });
       }
     } catch (err) {
@@ -55,6 +92,7 @@ export default function AboutEditor() {
     setMessage(null);
 
     try {
+      // DİKKAT: Gerçek API bağlantısı
       const res = await fetch(`/api/about/${about.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -149,21 +187,49 @@ export default function AboutEditor() {
         />
       </div>
 
-      {/* 3. Görsel URL Alanı */}
+      {/* 3. Görsel URL Alanı ve Yükleyici */}
       <div className="mb-6">
-        <label htmlFor="image_url" className="block text-sm font-medium text-neutral-300 mb-2">Görsel URL</label>
-        <div className="flex items-center gap-4">
+        <label htmlFor="image_url" className="block text-sm font-medium text-neutral-300 mb-2">Görsel URL / Yükle</label>
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+          
+          {/* URL Input */}
           <input
             id="image_url"
             type="text"
             value={about.image_url}
             onChange={(e) => handleChange('image_url', e.target.value)}
             className={`flex-1 ${NEUTRAL_BG_CLASS} border border-neutral-600 p-3 rounded-lg focus:ring-red-500 focus:border-red-500 transition duration-150`}
-            placeholder="https://gorsel-adresiniz.com/hakkimizda.jpg"
+            placeholder="https://gorsel-adresiniz.com/hakkimizda.jpg veya Base64 Verisi"
           />
+
+          {/* Yükleme Butonu */}
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            accept="image/*" 
+            className="hidden" 
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                uploadImage(e.target.files[0]);
+              }
+            }}
+          />
+          <button
+            onClick={handleUploadClick}
+            disabled={uploading}
+            className={`
+              w-full md:w-auto flex-shrink-0 
+              px-4 py-3 text-sm font-semibold rounded-lg shadow-md
+              transition duration-200
+              ${uploading ? 'bg-neutral-600 text-neutral-400 cursor-not-allowed' : 'bg-neutral-700 hover:bg-neutral-600 text-white'}
+            `}
+          >
+            {uploading ? "Yükleniyor..." : "Görsel Yükle"}
+          </button>
+          
+          {/* Resim önizleme */}
           {about.image_url && (
-            <div className="w-20 h-20 rounded-lg overflow-hidden border border-neutral-600 shrink-0">
-              {/* Resim önizleme */}
+            <div className="w-20 h-20 rounded-lg overflow-hidden border border-neutral-600 shrink-0 self-center md:self-auto">
               <img 
                 src={about.image_url} 
                 alt="Önizleme" 
@@ -183,7 +249,7 @@ export default function AboutEditor() {
       <div className="pt-4 border-t border-neutral-700 flex justify-end">
         <button
           onClick={updateAbout}
-          disabled={saving}
+          disabled={saving || uploading}
           className={`
             ${ACCENT_COLOR_CLASS} text-white font-semibold 
             px-6 py-3 rounded-lg shadow-lg 
@@ -196,4 +262,4 @@ export default function AboutEditor() {
       </div>
     </section>
   );
-}
+} 

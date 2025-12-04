@@ -1,6 +1,6 @@
 "use client";
 import AboutEditor from "@/components/admin/AboutEditor";
-import BlogEditor from "@/components/admin/BlogEditor";
+import BlogEditor from "@/components/admin/BlogPostsEditor";
 import FooterEditor from "@/components/admin/FooterEditor";
 import HeroEditor from "@/components/admin/HeroEditor";
 import QuoteEditor from "@/components/admin/QuoteEditor";
@@ -11,39 +11,96 @@ import { useState } from "react";
 import AboutFeaturesEditor from "@/components/admin/AboutFeatureEditor";
 import CorporateAboutEditor from "@/components/admin/CorporateAboutEditor";
 import CorporateFeaturesEditor from "@/components/admin/CorporateFeaturesEditor";
-// Sekme verilerine ikon ekliyoruz ve labelları netleştiriyoruz
-const tabs = [
-  { key: "hero", label: "Giriş (Hero)", icon: "🚀" },
-  { key: "siteInfo", label: "Genel Site Bilgisi", icon: "⚙️" },
-  { key: "projects", label: "Projeler", icon: "💡" },
-  { key: "team", label: "Ekip Yönetimi", icon: "👥" },
-  { key: "about", label: "Hakkımızda Metni", icon: "📝" },
-  { key: "aboutFeatures", label: "Hakkımızda Özellikleri", icon: "⭐" },
-  { key: "corpAbout", label: "Neden Biz", icon: "🏢" }, // YENİ
-  { key: "corpFeatures", label: "Kurumsal Sayfa Özellikleri", icon: "✅" }, // YENİ
-  { key: "quotes", label: "Alıntılar/Referanslar", icon: "💬" },
-  { key: "blog", label: "Blog Yazıları", icon: "📰" },
-  { key: "footer", label: "Footer İçeriği", icon: "⬇️" },
+import DegerlerimizEditor from "@/components/admin/DegerlerimizEditor";
+import CorporateWhyUsEditor from "@/components/admin/CorporateWhyUsEditor";
+import CorporateMissionVisionEditor from "@/components/admin/CorporateMissionVisionEditor";
+import OngoingProjectsEditor from "@/components/admin/OngoingProjectsEditor";
+import CompletedProjectsEditor from "@/components/admin/CompletedProjectsEditor";
+import ArchitecturePrinciplesEditor from "@/components/admin/ArchitecturePrincipleEditor";
+import QualityPillarsEditor from "@/components/admin/QualityPillarsEditor";
+import EcoFocusEditor from "@/components/admin/EcoFocusEditor";
+import ContactInfoEditor from "@/components/admin/ContactInfoEditor";
+
+// Gruplu sekmeler
+const sections = [
+  {
+    group: "Ana Sayfa",
+    items: [
+      { key: "hero", label: "Giriş (Hero)", icon: "🚀" },
+      { key: "about", label: "Hakkımızda", icon: "📝" },
+      { key: "projects", label: "Projeler", icon: "💡" },
+      { key: "team", label: "Ekip", icon: "👥" },
+      { key: "blog", label: "Blog", icon: "📰" },
+      { key: "quotes", label: "Alıntılar", icon: "💬" },
+      { key: "footer", label: "Footer", icon: "⬇️" },
+    ],
+  },
+  {
+    group: "Kurumsal",
+    items: [
+      { key: "kurumsal_hakkimizda", label: "Hakkımızda", icon: "🏢" },
+      { key: "kurumsal_misyon", label: "Misyon & Vizyon", icon: "🎯" },
+      { key: "kurumsal_degerler", label: "Değerlerimiz", icon: "💎" },
+      { key: "kurumsal_nedenbiz", label: "Neden Biz", icon: "❓" }, // YENİ
+    ],
+  },
+  {
+    group: "Hizmetlerimiz",
+    items: [
+      { key: "hizmet_mimari", label: "Mimari Tasarım", icon: "🏛️" },
+      { key: "hizmet_insaat", label: "Kaliteli İnşaat", icon: "🧱" },
+      { key: "hizmet_cevreci", label: "Çevre Dostu", icon: "🌿" },
+    ],
+  },
+  {
+    group: "Projeler",
+    items: [
+      { key: "proje_devam", label: "Devam Eden", icon: "🔄" },
+      { key: "proje_tamam", label: "Tamamlanan", icon: "✅" },
+    ],
+  },
+  {
+    group: "İletişim",
+    items: [
+      { key: "iletisim_bilgi", label: "İletişim Bilgileri", icon: "📞" },
+      { key: "iletisim_form", label: "Form Ayarları", icon: "📨" },
+    ],
+  },
 ];
 
 export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState("hero");
 
-  // İçeriği döndüren işlev
   const renderContent = () => {
     switch (activeTab) {
+      case "kurumsal_hakkimizda":
+        return <CorporateAboutEditor />;
+      case "kurumsal_misyon":
+        return <CorporateMissionVisionEditor />; // misyon/vizyon için
+      case "kurumsal_degerler":
+        return <DegerlerimizEditor />;
+      case "kurumsal_nedenbiz":
+        return <CorporateWhyUsEditor />;
       case "team":
         return <TeamEditor />;
       case "about":
         return <AboutEditor />;
       case "aboutFeatures":
         return <AboutFeaturesEditor />;
-      case "corpAbout": // YENİ
-        return <CorporateAboutEditor />;
-      case "corpFeatures": // YENİ
-        return <CorporateFeaturesEditor />;
       case "projects":
         return <ProjectEditor />;
+      case "proje_devam":
+        return <OngoingProjectsEditor />; // Devam Eden Projeler Editor
+      case "proje_tamam":
+        return <CompletedProjectsEditor />;
+      case "hizmet_mimari":
+        return <ArchitecturePrinciplesEditor />;
+      case "hizmet_insaat":
+        return <QualityPillarsEditor />;
+      case "hizmet_cevreci":
+        return <EcoFocusEditor />;
+      case "iletisim_bilgi":
+        return <ContactInfoEditor />;
       case "quotes":
         return <QuoteEditor />;
       case "siteInfo":
@@ -64,50 +121,48 @@ export default function AdminPanel() {
   };
 
   return (
-    // Ana kapsayıcı: Koyu arka plan ve ekranı kapla
     <div className="flex min-h-screen bg-neutral-900 text-white">
-      {/* 1. Sidebar (Kenar Çubuğu) */}
+      {/* Sidebar */}
       <aside className="w-72 bg-neutral-800 flex flex-col shadow-2xl z-10 border-r border-neutral-700">
-        {/* Panel Başlığı */}
         <div className="p-6 text-2xl font-extrabold text-red-400 border-b border-neutral-700">
           ⚙️ Yönetim Paneli
         </div>
 
-        {/* Navigasyon Alanı */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`
-                w-full flex items-center gap-3 text-left px-4 py-3 rounded-lg 
-                font-medium transition-all duration-200 ease-in-out
-                ${
-                  activeTab === tab.key
-                    ? // Aktif sekme: red vurgu, hafif gölge
-                      "bg-red-600 text-white shadow-md shadow-red-600/30"
-                    : // Pasif sekme: Hover ile rengi aç ve vurgula
-                      "text-neutral-300 hover:bg-neutral-700 hover:text-red-400"
-                }
-              `}
-              title={tab.label}
-            >
-              <span className="text-xl leading-none">{tab.icon}</span>
-              {tab.label}
-            </button>
+        <nav className="flex-1 p-4 space-y-4 overflow-y-auto custom-scrollbar">
+          {sections.map((section) => (
+            <div key={section.group}>
+              <h2 className="text-sm font-bold text-neutral-400 mb-2 uppercase">
+                {section.group}
+              </h2>
+              {section.items.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`w-full flex items-center gap-3 text-left px-4 py-2 rounded-lg font-medium transition-all duration-200 ease-in-out ${
+                    activeTab === tab.key
+                      ? "bg-red-600 text-white shadow-md shadow-red-600/30"
+                      : "text-neutral-300 hover:bg-neutral-700 hover:text-red-400"
+                  }`}
+                  title={tab.label}
+                >
+                  <span className="text-xl leading-none">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           ))}
         </nav>
       </aside>
 
-      {/* 2. Main Content (Ana İçerik) */}
+      {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          {/* Başlık Dinamik Olarak Güncellenir */}
           <h1 className="text-3xl font-bold mb-6 text-red-400 border-b border-neutral-700 pb-2">
-            {tabs.find((t) => t.key === activeTab)?.label}
+            {
+              sections.flatMap((s) => s.items).find((t) => t.key === activeTab)
+                ?.label
+            }
           </h1>
-
-          {/* İçerik Kartı: Koyu Temada Hafif Açık Kart */}
           <div className="bg-neutral-800 p-6 md:p-10 rounded-xl shadow-2xl border border-neutral-700 min-h-[80vh]">
             {renderContent()}
           </div>

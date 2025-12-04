@@ -3,23 +3,25 @@ import { useEffect, useState } from "react";
 import { uploadImage } from "@/lib/supabase/uploadImage";
 import { mutate } from "swr";
 
-// TypeScript Arayüzleri
-type IncomingProject = {
-  id: number;
-  title: string;
-  description: string;
-  image_url: string;
-  order?: number;
-  status: string;
-};
+// DÜZELTME: Durum tiplerini daha açık hale getirdik
+type UiProjectStatus = "draft" | "published" | "archived" | "active" | "inactive"; 
 
 type UiProject = {
   id: number;
   title: string;
   description: string;
-  image_url: string;
+  image_url?: string;
+  order: number;
+  status: UiProjectStatus;
+};
+
+type IncomingProject = {
+  id: number;
+  title: string;
+  description?: string;
+  image_url?: string;
   order?: number;
-  status: "active" | "inactive"; // Durum tiplerini kısıtladık
+  status?: UiProjectStatus | string;
 };
 
 // Vurgu renkleri (red)
@@ -42,42 +44,59 @@ export default function ProjectEditor() {
   });
   const [editing, setEditing] = useState<UiProject | null>(null);
   const [saving, setSaving] = useState(false);
-  const [loading, setLoading] = useState(true); // Yükleme state'i eklendi
-  const [error, setError] = useState<string | null>(null); // Hata state'i eklendi
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState<string | null>(null); 
 
-  // Veri çekme (fetch) işlemi
+  // --- 1. Veri Çekme İşlemi (useEffect içine taşındı) ---
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch("/api/projects")
-      .then((res) => {
-        if (!res.ok) throw new Error("Projeler yüklenirken hata oluştu.");
-        return res.json();
-      })
-      .then((data: IncomingProject[]) => {
-        const mapped = data.map((p) => ({
+    const fetchProjects = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await fetch("/api/projects");
+
+        if (!res.ok) {
+          // Hata durumunda body'yi düzgün okumaya çalış
+          const errText = await res.text();
+          throw new Error(errText || "Projeler yüklenirken hata oluştu.");
+        }
+
+        const json = await res.json();
+
+        // Gelen veriyi güvenli bir şekilde array formatına dönüştürme
+        const arr: IncomingProject[] =
+          Array.isArray(json) ? json :
+          Array.isArray(json?.data) ? json.data :
+          json && typeof json === 'object' && json.id ? [json as IncomingProject] : [];
+
+        const mapped: UiProject[] = arr.map((p) => ({
           id: p.id,
           title: p.title,
-          description: p.description,
+          description: p.description ?? "",
           image_url: p.image_url,
           order: p.order ?? 0,
-          status: p.status as UiProject["status"],
+          status: (p.status as UiProjectStatus) ?? "draft",
         }));
-        setProjects(mapped.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
-      })
-      .catch((err) => {
-        setError(err.message);
-      })
-      .finally(() => {
+
+        setProjects(mapped.sort((a, b) => a.order - b.order));
+      } catch (err: any) {
+        // console.error(err);
+        setError(err.message || "Bilinmeyen bir hata oluştu.");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchProjects();
   }, []);
+  // --- Veri Çekme Sonu ---
 
   // Yeni Proje Ekleme
   const addProject = async () => {
     setSaving(true);
     setError(null);
-    const { id, ...payload } = newProject; // id alanını gönderme
+    const { id, ...payload } = newProject; 
 
     try {
       const res = await fetch("/api/projects", {
@@ -90,15 +109,11 @@ export default function ProjectEditor() {
         const err = await res.json().catch(() => ({}));
         throw new Error(err?.error ?? `Hata kodu: ${res.status}`);
       }
-
-      const created: IncomingProject = await res.json();
-      const newUiProject: UiProject = {
-        ...created,
-        status: created.status as UiProject["status"],
-        order: created.order ?? 0,
-      };
       
-      setProjects((prev) => [...prev, newUiProject].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)));
+      // Supabase'den dönen veri tipinin doğru olması beklenir
+      const created: UiProject = await res.json();
+      
+      setProjects((prev) => [...prev, created].sort((a, b) => a.order - b.order));
       setNewProject({ id: 0, title: "", description: "", image_url: "", status: "active", order: 0 });
       mutate("/api/projects");
     } catch (err) {
@@ -120,7 +135,10 @@ export default function ProjectEditor() {
             body: JSON.stringify({ id }),
         });
         
-        if (!res.ok) throw new Error("Silme başarısız.");
+        if (!res.ok) {
+           const err = await res.json().catch(() => ({}));
+           throw new Error(err?.error || "Silme başarısız.");
+        }
         
         setProjects((prev) => prev.filter((p) => p.id !== id));
         mutate("/api/projects");
@@ -132,28 +150,30 @@ export default function ProjectEditor() {
   // Sıralamayı Güncelleme
   const updateOrder = async () => {
     setSaving(true);
+    setError(null);
     try {
-        // Sıralamayı doğru şekilde kaydetmek için sadece order alanını göndermek daha verimli olabilir
-        // Ancak mevcut API yapınıza uyum sağlamak için tüm projeyi gönderiyorum:
+        // Sadece ID ve ORDER alanlarını göndererek toplu PUT işlemi yapıyoruz
         for (const project of projects) {
-            const payload: IncomingProject = {
+            const payload = {
                 id: project.id,
-                title: project.title,
-                description: project.description,
-                image_url: project.image_url,
                 order: project.order,
-                status: project.status,
             };
-            await fetch("/api/projects", {
+            
+            const res = await fetch("/api/projects", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
+
+            if (!res.ok) {
+                 const err = await res.json().catch(() => ({}));
+                 throw new Error(err?.error || `ID ${project.id} için sıralama güncellenirken hata oluştu.`);
+            }
         }
         alert("Sıralama başarıyla güncellendi.");
         mutate("/api/projects");
-    } catch (e) {
-        alert("Sıralama güncellenirken hata oluştu.");
+    } catch (e: any) {
+        setError(e.message || "Sıralama güncellenirken hata oluştu.");
     } finally {
         setSaving(false);
     }
@@ -185,18 +205,11 @@ export default function ProjectEditor() {
             const err = await res.json().catch(() => ({}));
             throw new Error(err?.error || "Güncelleme başarısız.");
         }
+        
+        // Yanıt beklenen UiProject tipinde dönmelidir
+        const returned: UiProject = await res.json();
 
-        const returned: IncomingProject = await res.json();
-        const updated: UiProject = {
-            id: returned.id,
-            title: returned.title,
-            description: returned.description,
-            image_url: returned.image_url,
-            order: returned.order ?? 0,
-            status: returned.status as UiProject["status"],
-        };
-
-        setProjects((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+        setProjects((prev) => prev.map((p) => (p.id === returned.id ? returned : p)));
         setEditing(null);
         mutate("/api/projects");
     } catch (err) {
@@ -230,7 +243,7 @@ export default function ProjectEditor() {
       {/* Hata Mesajı */}
       {error && (
         <div className="p-3 mb-6 rounded-lg font-medium bg-red-600/30 border border-red-500 text-red-300">
-          Hata: {error}
+          Hata: **{error}**
         </div>
       )}
 
@@ -243,7 +256,7 @@ export default function ProjectEditor() {
             <span className={`absolute top-0 right-0 m-1 px-2 py-1 text-xs rounded-full font-semibold ${
                 p.status === 'active' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
             }`}>
-                {p.status === 'active' ? 'AKTİF' : 'PASİF'}
+              {p.status.toUpperCase()}
             </span>
 
             {p.image_url && (
@@ -385,9 +398,10 @@ export default function ProjectEditor() {
             id="edit_order"
             type="number"
             value={editing.order ?? 0}
-            onChange={(e) =>
-              setEditing({ ...editing, order: parseInt(e.target.value) })
-            }
+            onChange={(e) => {
+                const value = parseInt(e.target.value);
+                setEditing({ ...editing, order: isNaN(value) ? 0 : value });
+            }}
             className={`w-full border ${BORDER_CLASS} p-3 rounded-lg ${INPUT_BG_CLASS} text-white focus:ring-red-500 focus:border-red-500`}
             placeholder="Sıra"
             disabled={saving}
@@ -507,7 +521,7 @@ export default function ProjectEditor() {
         
         <button
           onClick={addProject}
-          disabled={saving}
+          disabled={saving || !newProject.title} // Başlık boşsa devre dışı bırak
           className={`
             ${ACCENT_PRIMARY_CLASS} text-white px-6 py-2 rounded-lg font-semibold 
             hover:bg-red-500 transition disabled:opacity-50

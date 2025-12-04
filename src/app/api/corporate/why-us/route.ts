@@ -1,42 +1,36 @@
-// app/api/corporate/why-us/route.ts
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabase/client";
 
-// ... diğer import'lar ve GET fonksiyonu ...
-import { createRouteHandlerClient } from '@/lib/supabase/server'; 
-import { NextResponse } from 'next/server';
+export async function GET() {
+  const { data, error } = await supabase
+    .from("corporate_why_us")
+    .select("*")
+    .order("order_index", { ascending: true });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json(data);
+}
 
 export async function POST(req: Request) {
-    const supabase = createRouteHandlerClient();
-    // Front-end'den gelen ve id'leri temizlenmiş yeni özellik listesi
-    const newFeatures = await req.json();
+  const body = await req.json();
+  const { error } = await supabase.from("corporate_why_us").insert([body]);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}
 
-    try {
-        // 1. ADIM: Tablodaki TÜM eski kayıtları silin.
-        // Bu, veritabanını temizler ve yeni listeye yer açar.
-        const { error: deleteError } = await supabase
-            .from('why_us_features')
-            .delete()
-            .neq('id', 0); // "id 0'a eşit olmayanları sil" (yani hepsini sil)
+export async function PUT(req: Request) {
+  const body = await req.json();
+  const { error } = await supabase
+    .from("corporate_why_us")
+    .update(body)
+    .eq("id", body.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
+}
 
-        if (deleteError) {
-            console.error('Supabase DELETE Hatası:', deleteError);
-            return NextResponse.json({ error: 'Eski veriler silinirken hata oluştu.' }, { status: 500 });
-        }
-
-        // 2. ADIM: Yeni listeyi ekleyin.
-        // Supabase bu aşamada her kayıt için otomatik olarak yeni bir 'id' atayacaktır.
-        const { data: insertedData, error: insertError } = await supabase
-            .from('why_us_features')
-            .insert(newFeatures) // Front-end'den gelen ve id'leri temizlenmiş veri
-            .select('*');
-
-        if (insertError) {
-            console.error('Supabase INSERT Hatası:', insertError);
-            return NextResponse.json({ error: 'Yeni veriler kaydedilirken hata oluştu.' }, { status: 500 });
-        }
-
-        return NextResponse.json({ message: 'Neden Biz Özellikleri başarıyla güncellendi.', data: insertedData }, { status: 200 });
-    } catch (error) {
-        console.error('Sunucu Hatası:', error);
-        return NextResponse.json({ error: 'Sunucu tarafında bir hata oluştu.' }, { status: 500 });
-    }
+export async function DELETE(req: Request) {
+  const { id } = await req.json();
+  const { error } = await supabase.from("corporate_why_us").delete().eq("id", id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true });
 }

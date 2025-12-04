@@ -12,15 +12,16 @@ import Navbar from "@/components/Navbar";
 export default function HomePage() {
   return (
     <>
-    <Navbar />
       <main>
         <HeroSection />
         <AboutSection />
         <ProjectsSection />
+        {/* EKLEME: Ekip Bölümü (TeamSection), projelerden sonra eklendi */}
+        <TeamSection /> 
         <BlogSection />
         <QuoteSection />
         <ContactSection />
-      </main>
+      </main> 
     </>
   );
 }

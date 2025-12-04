@@ -17,7 +17,7 @@ type BlogPost = {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function BlogSection() {
-  const { data: posts = [] } = useSWR<BlogPost[]>("/api/blog", fetcher);
+  const { data: posts = [] } = useSWR<BlogPost[]>("/api/blog/posts", fetcher);
   const sorted = [...posts].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const limited = sorted.slice(0, 3);
 

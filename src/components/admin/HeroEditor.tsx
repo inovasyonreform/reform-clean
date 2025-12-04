@@ -27,7 +27,10 @@ export default function HeroEditor() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   // Hashtag dizesi için ayrı state
   const [hashtagInput, setHashtagInput] = useState<string>("");
@@ -63,7 +66,8 @@ export default function HeroEditor() {
         setHero({ id: 0, title: "", hashtags: [], background: "" });
       }
     } catch (err) {
-      const errorText = err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu.";
+      const errorText =
+        err instanceof Error ? err.message : "Bilinmeyen bir hata oluştu.";
       setError(errorText);
       setMessage({ type: "error", text: `Veri alınırken hata: ${errorText}` });
     } finally {
@@ -106,9 +110,13 @@ export default function HeroEditor() {
         throw new Error(err.error || "Güncelleme başarısız.");
       }
 
-      setMessage({ type: "success", text: "🚀 Giriş (Hero) bölümü başarıyla güncellendi!" });
+      setMessage({
+        type: "success",
+        text: "🚀 Giriş (Hero) bölümü başarıyla güncellendi!",
+      });
     } catch (err) {
-      const errorText = err instanceof Error ? err.message : "Sunucuya bağlanılamadı.";
+      const errorText =
+        err instanceof Error ? err.message : "Sunucuya bağlanılamadı.";
       setError(errorText);
       setMessage({ type: "error", text: `HATA: ${errorText}` });
     } finally {
@@ -117,7 +125,10 @@ export default function HeroEditor() {
   };
 
   // Title ve Background için değişim yöneticisi
-  const handleChange = (field: keyof Omit<HeroContent, "hashtags">, value: string) => {
+  const handleChange = (
+    field: keyof Omit<HeroContent, "hashtags">,
+    value: string
+  ) => {
     setHero((prev) => (prev ? { ...prev, [field]: value } : null));
     setMessage(null);
     setError(null);
@@ -128,8 +139,18 @@ export default function HeroEditor() {
     return (
       <div className={`p-6 ${CARD_BG_CLASS} rounded-xl shadow-lg text-white`}>
         <p className="flex items-center gap-2 text-neutral-400">
-          <svg className="animate-spin h-5 w-5 text-red-400" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <svg
+            className="animate-spin h-5 w-5 text-red-400"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
             <path
               className="opacity-75"
               fill="currentColor"
@@ -142,14 +163,21 @@ export default function HeroEditor() {
     );
 
   // Hata durumu
-  if (error) return <p className="p-4 bg-red-800 text-white rounded-lg">Hata: {error}</p>;
+  if (error)
+    return (
+      <p className="p-4 bg-red-800 text-white rounded-lg">Hata: {error}</p>
+    );
 
   if (!hero) return null;
 
   return (
     // Ana Kapsayıcı: Koyu temaya uygun kart
-    <section className={`p-8 rounded-xl shadow-2xl text-white border border-neutral-700 ${CARD_BG_CLASS}`}>
-      <h2 className={`text-2xl font-bold mb-6 border-b border-neutral-700 pb-2 ${TEXT_ACCENT_CLASS}`}>
+    <section
+      className={`p-8 rounded-xl shadow-2xl text-white border border-neutral-700 ${CARD_BG_CLASS}`}
+    >
+      <h2
+        className={`text-2xl font-bold mb-6 border-b border-neutral-700 pb-2 ${TEXT_ACCENT_CLASS}`}
+      >
         🚀 Giriş Bölümü (Hero) Düzenleyici
       </h2>
 
@@ -169,7 +197,10 @@ export default function HeroEditor() {
       <div className="space-y-6">
         {/* 1. Başlık */}
         <div className="space-y-2">
-          <label htmlFor="title" className="block text-sm font-medium text-neutral-300">
+          <label
+            htmlFor="title"
+            className="block text-sm font-medium text-neutral-300"
+          >
             Ana Başlık
           </label>
           <input
@@ -185,7 +216,10 @@ export default function HeroEditor() {
 
         {/* 2. Hashtagler */}
         <div className="space-y-2">
-          <label htmlFor="hashtags" className="block text-sm font-medium text-neutral-300">
+          <label
+            htmlFor="hashtags"
+            className="block text-sm font-medium text-neutral-300"
+          >
             Etiketler/Hashtagler (Virgülle Ayırın)
           </label>
           <textarea
@@ -205,17 +239,27 @@ export default function HeroEditor() {
               .map((s) => s.trim())
               .filter((s) => s.length > 0)
               .map((tag, index) => (
-                <span key={index} className="px-3 py-1 text-sm rounded-full bg-red-600/20 text-red-400 font-medium">
+                <span
+                  key={index}
+                  className="px-3 py-1 text-sm rounded-full bg-red-600/20 text-red-400 font-medium"
+                >
                   #{tag}
                 </span>
               ))}
-            {hashtagInput.trim() === "" && <span className="text-neutral-500 text-sm italic">Etiket yok.</span>}
+            {hashtagInput.trim() === "" && (
+              <span className="text-neutral-500 text-sm italic">
+                Etiket yok.
+              </span>
+            )}
           </div>
         </div>
 
         {/* 3. Arka Plan Görseli */}
         <div className="space-y-2">
-          <label htmlFor="background" className="block text-sm font-medium text-neutral-300">
+          <label
+            htmlFor="background"
+            className="block text-sm font-medium text-neutral-300"
+          >
             Arka Plan Görsel URL
           </label>
           <input
@@ -238,38 +282,37 @@ export default function HeroEditor() {
               const file = e.target.files?.[0];
               if (!file) return;
 
-              setUploading(true);
-              setError(null);
-              setMessage(null);
-
-              // Preview için local URL
               const previewUrl = URL.createObjectURL(file);
-              setHero((prev) => (prev ? { ...prev, background: previewUrl } : null));
+              setHero((prev) =>
+                prev ? { ...prev, background: previewUrl } : prev
+              );
 
-              // Dosya uzantısını koru ve benzersiz isim üret
-              const ext = file.name.split(".").pop();
-              const fileName = `hero-${Date.now()}.${ext ?? "png"}`;
-
-              // Upload için Supabase Storage
-              const { data, error } = await supabase.storage.from("images").upload(fileName, file, {
-                upsert: false,
-              });
+              const ext = file.name.split(".").pop() || "png";
+              const fileName = `hero-${Date.now()}.${ext}`;
+              const { data, error } = await supabase.storage
+                .from("hero-images")
+                .upload(fileName, file, { upsert: false });
 
               if (error) {
-                setError(error.message);
-                setMessage({ type: "error", text: `Görsel yüklenemedi: ${error.message}` });
+                setMessage({
+                  type: "error",
+                  text: `Görsel yüklenemedi: ${error.message}`,
+                });
               } else {
-                // Public URL'i doğru şekilde al
-                const { data: publicData } = supabase.storage.from("images").getPublicUrl(data.path);
+                const { data: publicData } = supabase.storage
+                  .from("hero-images")
+                  .getPublicUrl(fileName);
                 const publicUrl = publicData?.publicUrl ?? "";
-
-                setHero((prev) => (prev ? { ...prev, background: publicUrl } : null));
-                setMessage({ type: "success", text: "Görsel başarıyla yüklendi." });
+                setHero((prev) =>
+                  prev ? { ...prev, background: publicUrl } : prev
+                );
+                setMessage({
+                  type: "success",
+                  text: "Görsel başarıyla yüklendi.",
+                });
               }
 
-              // Preview URL'i serbest bırak
               URL.revokeObjectURL(previewUrl);
-              setUploading(false);
             }}
           />
 
@@ -282,7 +325,8 @@ export default function HeroEditor() {
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.onerror = null;
-                  target.src = "https://via.placeholder.com/400x160?text=Görsel+Yüklenemedi";
+                  target.src =
+                    "https://via.placeholder.com/400x160?text=Görsel+Yüklenemedi";
                 }}
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-lg font-bold">
@@ -304,7 +348,11 @@ export default function HeroEditor() {
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}
           >
-            {saving ? "💾 Kaydediliyor..." : uploading ? "📤 Yükleniyor..." : "Kaydet ve Güncelle"}
+            {saving
+              ? "💾 Kaydediliyor..."
+              : uploading
+              ? "📤 Yükleniyor..."
+              : "Kaydet ve Güncelle"}
           </button>
         </div>
       </div>

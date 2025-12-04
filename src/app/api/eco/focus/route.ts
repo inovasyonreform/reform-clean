@@ -1,46 +1,42 @@
-// src/app/api/corporate/about/route.ts
 import { NextResponse } from "next/server";
 import { createRouteHandlerClient } from "@/lib/supabase/server";
 
 const supabaseAdmin = createRouteHandlerClient();
 
-const TABLE = "corporate_about";
+const TABLE = "eco_focus_areas";
 
+// Listeleme
 export async function GET() {
   const { data, error } = await supabaseAdmin
-    .from("corporate_about")
+    .from(TABLE)
     .select("*")
-    .order("id", { ascending: true })
-    .limit(1) // sadece ilk kaydı al
-    .maybeSingle(); // tek obje döner
+    .eq("is_active", true)
+    .order("id", { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data ?? {});
+  return NextResponse.json(data ?? []);
 }
 
+// Yeni ekleme
 export async function POST(req: Request) {
   const body = await req.json();
-  const { error, data } = await supabaseAdmin.from(TABLE).insert(body).select("*").single();
+  const { data, error } = await supabaseAdmin.from(TABLE).insert(body).select("*").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
 
+// Güncelleme
 export async function PUT(req: Request) {
   const body = await req.json();
   const { id, ...fields } = body;
   if (!id) return NextResponse.json({ error: "id gerekli" }, { status: 400 });
 
-  const { error, data } = await supabaseAdmin
-    .from(TABLE)
-    .update(fields) // id hariç alanlar
-    .eq("id", id)
-    .select("*")
-    .single();
-
+  const { data, error } = await supabaseAdmin.from(TABLE).update(fields).eq("id", id).select("*").maybeSingle();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
 
+// Silme
 export async function DELETE(req: Request) {
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: "id gerekli" }, { status: 400 });
