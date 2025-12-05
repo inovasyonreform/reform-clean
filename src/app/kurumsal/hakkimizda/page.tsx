@@ -300,7 +300,7 @@ export default function AboutUs() {
           </p>
           <a
             href="#iletisim"
-            className="inline-flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-bold rounded-lg transition-all duration-300 shadow-xl shadow-red-600/50 transform hover:-translate-y-1 hover:from-red-500 hover:to-red-400"
+            className="inline-flex items-center gap-3 px-8 py-3 bg-linear-to-r from-red-600 to-red-500 text-white font-bold rounded-lg transition-all duration-300 shadow-xl shadow-red-600/50 transform hover:-translate-y-1 hover:from-red-500 hover:to-red-400"
           >
             <EnvelopeIcon className="w-5 h-5" />
             Ücretsiz Danışmanlık Alın
