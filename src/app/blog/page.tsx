@@ -55,7 +55,6 @@ export default function BlogSayfasi() {
 
   return (
     <main className="bg-neutral-950 min-h-screen text-white">
-      <Navbar />
 
       {/* HERO */}
       <section

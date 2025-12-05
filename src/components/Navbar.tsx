@@ -124,7 +124,7 @@ export default function Navbar() {
             className="flex items-center hover:opacity-80 transition-opacity duration-300 group"
             aria-label="Anasayfa"
           >
-            <div className="relative">
+            <div className="relative ">
               <Image
                 src="/logo.png"
                 alt="Reform Logo"

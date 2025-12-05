@@ -16,8 +16,6 @@ export default function HomePage() {
         <HeroSection />
         <AboutSection />
         <ProjectsSection />
-        {/* EKLEME: Ekip Bölümü (TeamSection), projelerden sonra eklendi */}
-        <TeamSection /> 
         <BlogSection />
         <QuoteSection />
         <ContactSection />

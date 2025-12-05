@@ -20,6 +20,8 @@ import ArchitecturePrinciplesEditor from "@/components/admin/ArchitecturePrincip
 import QualityPillarsEditor from "@/components/admin/QualityPillarsEditor";
 import EcoFocusEditor from "@/components/admin/EcoFocusEditor";
 import ContactInfoEditor from "@/components/admin/ContactInfoEditor";
+import { group } from "console";
+import HomeBlogEditor from "@/components/admin/HomeBlogEditor";
 
 // Gruplu sekmeler
 const sections = [
@@ -29,8 +31,7 @@ const sections = [
       { key: "hero", label: "Giriş (Hero)", icon: "🚀" },
       { key: "about", label: "Hakkımızda", icon: "📝" },
       { key: "projects", label: "Projeler", icon: "💡" },
-      { key: "team", label: "Ekip", icon: "👥" },
-      { key: "blog", label: "Blog", icon: "📰" },
+      { key: "home_blog", label: "Anasayfa Blog", icon: "📻" },
       { key: "quotes", label: "Alıntılar", icon: "💬" },
       { key: "footer", label: "Footer", icon: "⬇️" },
     ],
@@ -39,6 +40,7 @@ const sections = [
     group: "Kurumsal",
     items: [
       { key: "kurumsal_hakkimizda", label: "Hakkımızda", icon: "🏢" },
+      { key: "team", label: "Ekip", icon: "👥" },
       { key: "kurumsal_misyon", label: "Misyon & Vizyon", icon: "🎯" },
       { key: "kurumsal_degerler", label: "Değerlerimiz", icon: "💎" },
       { key: "kurumsal_nedenbiz", label: "Neden Biz", icon: "❓" }, // YENİ
@@ -57,6 +59,16 @@ const sections = [
     items: [
       { key: "proje_devam", label: "Devam Eden", icon: "🔄" },
       { key: "proje_tamam", label: "Tamamlanan", icon: "✅" },
+    ],
+  },
+  {
+    group: "Blog",
+    items: [
+      {
+        key: "blog",
+        label: "Blog",
+        icon: "🎓",
+      },
     ],
   },
   {
@@ -85,6 +97,8 @@ export default function AdminPanel() {
         return <TeamEditor />;
       case "about":
         return <AboutEditor />;
+      case "home_blog":
+        return <HomeBlogEditor />;
       case "aboutFeatures":
         return <AboutFeaturesEditor />;
       case "projects":

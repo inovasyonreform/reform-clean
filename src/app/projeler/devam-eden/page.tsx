@@ -40,7 +40,6 @@ export default function DevamEdenProjeler() {
 
   return (
     <main className="bg-linear-to-b from-neutral-950 via-neutral-900 to-neutral-950 min-h-screen">
-      <Navbar />
 
       {/* HERO */}
       <section

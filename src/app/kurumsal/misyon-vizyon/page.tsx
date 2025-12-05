@@ -33,7 +33,6 @@ export default function MisyonVizyon() {
 
   return (
     <main className="bg-linear-to-b from-neutral-950 via-neutral-900 to-neutral-950 min-h-screen">
-      <Navbar />
 
       {/* HERO */}
       <section id="focus-header" className="relative pt-40 pb-20 text-white text-center overflow-hidden border-b border-neutral-700">

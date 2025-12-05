@@ -59,7 +59,6 @@ export default function Degerlerimiz() {
 
   return (
     <main>
-      <Navbar />
 
       <div className="relative z-10">
         {/* HEADER */}

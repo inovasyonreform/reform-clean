@@ -102,21 +102,21 @@ export default function AboutUs() {
 
   // --- Why Us verisi çek ---
   const fetchWhyUsData = async () => {
-  setIsWhyUsLoading(true);
-  try {
-    const { data, error } = await supabase
-      .from("corporate_why_us")
-      .select("*")
-      .eq("is_active", true) // sadece aktif olanlar
-      .order("order_index", { ascending: true });
+    setIsWhyUsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("corporate_why_us")
+        .select("*")
+        .eq("is_active", true) // sadece aktif olanlar
+        .order("order_index", { ascending: true });
 
-    if (!error) setWhyUsFeatures(data ?? []);
-  } catch (error) {
-    console.error("Neden Biz verisi çekilemedi:", error);
-  } finally {
-    setIsWhyUsLoading(false);
-  }
-};
+      if (!error) setWhyUsFeatures(data ?? []);
+    } catch (error) {
+      console.error("Neden Biz verisi çekilemedi:", error);
+    } finally {
+      setIsWhyUsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchAboutData();
@@ -148,7 +148,6 @@ export default function AboutUs() {
   // --- RENDER ---
   return (
     <main className="bg-linear-to-b from-neutral-950 via-neutral-900 to-neutral-950 min-h-screen">
-      <Navbar />
 
       {/* HERO */}
       <section

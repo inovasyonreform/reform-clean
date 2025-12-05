@@ -79,7 +79,6 @@ export default function IletisimSayfasi() {
 
   return (
     <main className="bg-neutral-950 min-h-screen text-white">
-      <Navbar />
 
       {/* HERO */}
       <section id="header" className="relative pt-40 pb-24 bg-neutral-950 text-center overflow-hidden border-b border-neutral-700">
